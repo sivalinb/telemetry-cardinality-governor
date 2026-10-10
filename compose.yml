@@ -1,0 +1,64 @@
+name: cardinality-governor
+x-app: &app
+  build: .
+  image: cardinality-governor:local
+  environment: &environment
+    GOVERNOR_RUNTIME_DIR: /data
+    GOVERNOR_MODE: lab
+    GOVERNOR_EXPORTER_TARGET: api:8000
+    GOVERNOR_MONITOR: "true"
+    PROMETHEUS_URL: http://prometheus:9090
+    TEMPORAL_ADDRESS: temporal:7233
+  volumes:
+    - governor-data:/data
+
+services:
+  init:
+    <<: *app
+    command: [governor, init]
+  temporal:
+    image: temporalio/temporal:1.9.1
+    command: [server, start-dev, --ip, 0.0.0.0, --ui-ip, 0.0.0.0, --db-filename, /data/temporal.sqlite, --ui-disable-news-fetch]
+    ports: ["127.0.0.1:7233:7233", "127.0.0.1:8233:8233"]
+    volumes: [temporal-data:/data]
+    healthcheck:
+      test: [CMD, temporal, operator, cluster, health]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  api:
+    <<: *app
+    command: [governor, serve, --host, 0.0.0.0]
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on:
+      init: {condition: service_completed_successfully}
+      temporal: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz')"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  prometheus:
+    image: prom/prometheus:v3.15.0
+    command: [--config.file=/data/prometheus.yml, --storage.tsdb.path=/prometheus, --web.enable-lifecycle, --storage.tsdb.retention.time=1h]
+    ports: ["127.0.0.1:9090:9090"]
+    volumes: ["governor-data:/data:ro", "prometheus-data:/prometheus"]
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, "http://127.0.0.1:9090/-/ready"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  worker:
+    <<: *app
+    command: [governor, worker]
+    restart: unless-stopped
+    depends_on:
+      prometheus: {condition: service_healthy}
+      temporal: {condition: service_healthy}
+
+volumes:
+  governor-data:
+  temporal-data:
+  prometheus-data:

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Approve, canary and verify telemetry cardinality policies with Temporal.">
+  <title>Telemetry Cardinality Governor</title>
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <aside class="rail">
+    <a class="brand" href="#overview"><img src="/static/icon.svg" alt="" width="36" height="36"><span>Cardinality<br><strong>Governor</strong></span></a>
+    <div class="rail-label">WORKSPACE</div>
+    <nav aria-label="Main navigation">
+      <a class="selected" href="#overview"><span>◫</span> Overview <span class="nav-dot"></span></a>
+      <a href="#review"><span>⌘</span> Policy review</a>
+      <a href="#history"><span>↺</span> Run history</a>
+      <a href="#workflow"><span>⇢</span> Workflow</a>
+    </nav>
+    <div class="rail-bottom"><div class="engine-mark">T</div><div><strong>Powered by Temporal</strong><small>Durable orchestration</small></div></div>
+  </aside>
+  <main id="overview">
+    <header class="topbar"><span class="breadcrumb">WORKSPACE <span>/</span> <strong>Overview</strong></span><div class="top-right"><span id="environment" class="chip">LOCAL LABORATORY</span><span class="online"><i></i> <span id="connection">Connecting</span></span><button id="token-button" class="icon-button" title="Configure API access" aria-label="Configure API access">⚙</button></div></header>
+    <section class="hero">
+      <div><div class="eyebrow"><span></span> TELEMETRY GOVERNANCE</div><h1>More signal.<br><span>Fewer runaway series.</span></h1><p>Detect cardinality spikes. Review an exact policy.<br>Let Temporal carry it through canary, verification and recovery.</p></div>
+      <div class="hero-graphic" aria-hidden="true"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="graphic-core">G<span>GOVERNED</span></div><span class="orbit-node node-a">1600</span><span class="orbit-node node-b">17</span><span class="orbit-node node-c">✓</span><span class="graphic-label">BOUND THE GROWTH.</span></div>
+    </section>
+    <div class="section-heading"><div><h2>Live series overview</h2><p>Current query-visible workload series · real Prometheus scrapes</p></div><span id="updated" class="muted">Waiting for first scrape</span></div>
+    <section class="stats" aria-label="Live series counts">
+      <article class="stat"><div class="stat-top"><span><i class="pool-dot production"></i> Production pool</span><span id="production-health" class="small-chip">—</span></div><div class="stat-number" id="production-count">—</div><div class="stat-footer"><span>Budget <strong id="budget-count">400</strong></span><span id="production-budget" class="status-label">Awaiting data</span></div><div class="meter"><div id="budget-meter"></div></div></article>
+      <article class="stat"><div class="stat-top"><span><i class="pool-dot canary"></i> Canary pool</span><span id="canary-health" class="small-chip">—</span></div><div class="stat-number" id="canary-count">—</div><div class="stat-footer"><span id="canary-reduction">No policy applied</span><span class="muted">Isolated validation</span></div><div class="sparkline"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></article>
+      <article class="stat"><div class="stat-top"><span><i class="pool-dot control"></i> Control pool</span><span id="control-health" class="small-chip">—</span></div><div class="stat-number" id="control-count">—</div><div class="stat-footer"><span>Unfiltered reference</span><span class="muted">Same workload</span></div><div class="reference-line"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></article>
+    </section>
+    <section class="lab-controls" id="lab-controls"><div><span class="eyebrow">TRY THE LAB</span><p>Synthetic workload. Real ingestion and workflow execution.</p></div><div class="scenario-buttons"><button data-scenario="healthy" class="button secondary">Healthy baseline</button><button data-scenario="explosion" class="button dark">Inject series spike <span>↗</span></button><button data-scenario="rollback" class="button secondary">Exercise rollback</button></div></section>
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+    <section class="middle-grid">
+      <article class="panel breakdown"><div class="panel-heading"><div><h2>Where the series live</h2><p>Production metric inventory</p></div><button id="scan-button" class="button secondary compact">Run analysis <span>→</span></button></div><div id="metric-chart" class="metric-chart"></div><div class="chart-key"><span><i class="key-optional"></i> Optional debug telemetry</span><span><i class="key-protected"></i> Protected service signals</span></div><div class="monitor-row"><div><strong>Automatic detection</strong><p>Watch for budget breaches every 3 seconds</p></div><label class="switch"><input id="monitor-toggle" type="checkbox" aria-label="Enable automatic detection"><span></span></label></div></article>
+      <article class="panel review" id="review"><div class="panel-heading"><div><h2>Policy review</h2><p>One explicit decision before any deployment</p></div><span id="phase-chip" class="phase-chip">No active run</span></div><div class="review-body"><div class="policy-caption"><span class="policy-icon">⌘</span><div><strong id="policy-metric">A policy will appear here</strong><p id="policy-reason">Inject a spike, then run analysis or enable automatic detection.</p></div></div><pre id="policy-code"># Exact-match Prometheus drop rule
+# No configuration changes before approval</pre><div id="label-evidence" class="label-evidence"></div><label class="reviewer-label" for="reviewer">Reviewer</label><input id="reviewer" value="demo-reviewer" maxlength="100" autocomplete="off"><div class="review-actions"><button id="approve-button" class="button green" disabled>Approve canary <span>✓</span></button><button id="reject-button" class="button secondary" disabled>Reject</button></div><div class="guard-note"><span>◇</span><p>Request counters, latency histograms and error signals are protected. Promotion requires three passing observations.</p></div></div></article>
+    </section>
+    <section class="panel workflow-panel" id="workflow"><div class="panel-heading"><div><h2>A durable path from detection to decision</h2><p id="workflow-reason">Temporal records progress so a worker restart can resume the same run.</p></div><button id="export-button" class="button secondary compact" disabled>Export history ↓</button></div><div class="stepper" id="stepper"><div data-step="analyzing"><span>01</span><strong>Analyze</strong><small>Bounded evidence</small></div><div data-step="awaiting_approval"><span>02</span><strong>Review</strong><small>Human decision</small></div><div data-step="observing_canary"><span>03</span><strong>Canary</strong><small>Measured guardrails</small></div><div data-step="promoting"><span>04</span><strong>Promote</strong><small>Approved policy</small></div><div data-step="succeeded"><span>05</span><strong>Verify</strong><small>Retain or restore</small></div></div><div id="timeline" class="timeline"></div></section>
+    <section class="panel history-panel" id="history"><div class="panel-heading"><div><h2>Recent governance runs</h2><p>Execution outcomes and their recorded evidence</p></div><span id="run-count" class="muted">0 runs</span></div><div class="table-scroll"><table><thead><tr><th>WORKFLOW</th><th>OUTCOME</th><th>METRIC</th><th>REDUCTION</th><th>UPDATED</th></tr></thead><tbody id="history-body"><tr><td colspan="5" class="empty-state">Start your first analysis to see its history here.</td></tr></tbody></table></div></section>
+    <footer><span>Telemetry Cardinality Governor <span>·</span> Open-source infrastructure lab</span><span>Measured evidence. Explicit approval. Durable recovery.</span></footer>
+  </main>
+  <dialog id="token-dialog"><form method="dialog"><h2>API access</h2><p>Enter the bearer token configured for this instance. It stays in this tab's session storage.</p><label for="api-token">API token</label><input id="api-token" type="password" autocomplete="off"><div class="dialog-actions"><button value="cancel" class="button secondary">Cancel</button><button id="save-token" value="save" class="button green">Save</button></div></form></dialog>
+</body>
+</html>
