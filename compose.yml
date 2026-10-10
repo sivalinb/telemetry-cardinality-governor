@@ -15,12 +15,16 @@ x-app: &app
 services:
   init:
     <<: *app
-    command: [governor, init]
+    # The official Temporal CLI image runs as uid 1000.
+    command: [sh, -c, "governor init && chown 1000:1000 /temporal-data"]
+    volumes: ["governor-data:/data", "temporal-data:/temporal-data"]
   temporal:
     image: temporalio/temporal:1.9.1
     command: [server, start-dev, --ip, 0.0.0.0, --ui-ip, 0.0.0.0, --db-filename, /data/temporal.sqlite, --ui-disable-news-fetch]
     ports: ["127.0.0.1:7233:7233", "127.0.0.1:8233:8233"]
     volumes: [temporal-data:/data]
+    depends_on:
+      init: {condition: service_completed_successfully}
     healthcheck:
       test: [CMD, temporal, operator, cluster, health]
       interval: 3s
